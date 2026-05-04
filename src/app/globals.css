@@ -5,6 +5,34 @@
    Tema: 3D Futurista & Elegante (Dark + Laranja/Roxo)
    ============================================ */
 
+:root {
+  --admin-bg: #080810;
+  --admin-bg2: #0e0e1a;
+  --admin-card: #111120;
+  --admin-card2: #16162a;
+  --admin-border: rgba(255,255,255,0.07);
+  --admin-border2: rgba(255,255,255,0.12);
+  --admin-primary: #E8833A;
+  --admin-primary-glow: rgba(232,131,58,0.2);
+  --admin-gold: #FCD34D;
+  --admin-success: #22C55E;
+  --admin-success-bg: rgba(34,197,94,0.12);
+  --admin-danger: #EF4444;
+  --admin-danger-bg: rgba(239,68,68,0.12);
+  --admin-warning: #F59E0B;
+  --admin-warning-bg: rgba(245, 158, 11, 0.12);
+  --admin-info: #38BDF8;
+  --admin-purple: #8B5CF6;
+  --admin-gray: #6B7280;
+  --admin-text: #F0F2FF;
+  --admin-text2: #8B90B8;
+  --admin-text3: #4A4D6A;
+  --sidebar-w: 240px;
+  --header-h: 64px;
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
 @theme {
   /* Core Colors (Revertidos para Cinza Escuro) */
   --color-bg: #0A0A0A;
