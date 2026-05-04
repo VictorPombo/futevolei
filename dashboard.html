@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuadraHub - Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #080810;
+            --bg2: #0e0e1a;
+            --card: #111120;
+            --card2: #16162a;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+            --primary: #E8833A;
+            --primary-glow: rgba(232,131,58,0.2);
+            --gold: #FCD34D;
+            --success: #22C55E;
+            --success-bg: rgba(34,197,94,0.12);
+            --danger: #EF4444;
+            --danger-bg: rgba(239,68,68,0.12);
+            --warning: #F59E0B;
+            --warning-bg: rgba(245, 158, 11, 0.12);
+            --info: #38BDF8;
+            --purple: #8B5CF6;
+            --gray: #6B7280;
+            --text: #F0F2FF;
+            --text2: #8B90B8;
+            --text3: #4A4D6A;
+            --sidebar-w: 240px;
+            --header-h: 64px;
+            --radius: 14px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% 0%, rgba(232, 131, 58, 0.05) 0%, transparent 50%),
+                              linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 20px 20px, 20px 20px;
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6, .display-font { font-family: 'Syne', sans-serif; }
+        .data-font { font-family: 'DM Mono', monospace; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+        /* Layout */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: rgba(17, 17, 32, 0.6);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            height: var(--header-h);
+            background: rgba(8, 8, 16, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 90;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            position: relative;
+        }
+
+        /* Sidebar Elements */
+        .logo {
+            padding: 24px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-group {
+            padding: 16px 0 8px 24px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text3);
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px;
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: var(--primary-glow);
+            border-right: 3px solid var(--primary);
+        }
+
+        .nav-item-left { display: flex; align-items: center; gap: 12px; }
+
+        .user-profile {
+            margin-top: auto;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--card2);
+            border: 1px solid var(--border2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold; color: var(--primary);
+        }
+
+        /* UI Components */
+        .badge {
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+        .badge-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+        .badge-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.2); }
+        .badge-primary { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(232,131,58,0.2); }
+        .badge-info { background: rgba(56,189,248,0.12); color: var(--info); border: 1px solid rgba(56,189,248,0.2); }
+        .badge-gray { background: rgba(255,255,255,0.05); color: var(--text2); border: 1px solid var(--border); }
+
+        .badge-dot { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 0; font-size: 10px; }
+
+        .card {
+            background: rgba(17, 17, 32, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            border-color: var(--border2);
+            background: rgba(22, 22, 42, 0.6);
+        }
+
+        .grid-1 { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px; }
+
+        .kpi-title { font-size: 14px; color: var(--text2); margin-bottom: 8px; font-weight: 500; }
+        .kpi-val { font-size: 32px; font-weight: 700; color: var(--text); }
+        .kpi-sub { font-size: 13px; margin-top: 4px; }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+        .text-primary { color: var(--primary); }
+
+        .alert {
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .alert-danger { background: var(--danger-bg); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+        .alert-warning { background: var(--warning-bg); border: 1px solid rgba(245,158,11,0.3); color: #fcd34d; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text2); font-weight: 500; font-size: 13px; }
+        td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn:hover { background: rgba(255,255,255,0.05); border-color: var(--border2); }
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .btn-primary:hover { background: #d06d2d; box-shadow: 0 0 15px var(--primary-glow); }
+        .btn-success { background: var(--success-bg); color: var(--success); border-color: rgba(34,197,94,0.3); }
+        .btn-success:hover { background: rgba(34,197,94,0.2); }
+        .btn-danger { background: var(--danger-bg); color: var(--danger); border-color: rgba(239,68,68,0.3); }
+        .btn-danger:hover { background: rgba(239,68,68,0.2); }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+        .page { display: none; opacity: 0; transform: translateY(10px); animation: fadeIn 0.4s forwards; }
+        .page.active { display: block; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        .chart-container { position: relative; height: 300px; width: 100%; }
+
+        /* Specifics */
+        .score-ring { width: 120px; height: 120px; position: relative; margin: 0 auto; }
+        .score-ring svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        .score-ring circle { fill: none; stroke-width: 8; stroke-linecap: round; }
+        .score-ring .bg { stroke: var(--border); }
+        .score-ring .progress { stroke: var(--warning); stroke-dasharray: 314; stroke-dashoffset: 182; /* 42% */ transition: 1s; }
+        .score-ring .val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: 700; color: var(--warning); font-family: 'Syne'; }
+
+        .checklist { list-style: none; }
+        .checklist li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; gap: 12px; font-size: 14px; }
+        .check-icon { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+        
+        .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+        .progress-fill { height: 100%; border-radius: 3px; }
+
+        .flow-diagram { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); overflow-x: auto; }
+        .flow-step { text-align: center; min-width: 120px; }
+        .flow-step .icon { width: 48px; height: 48px; background: var(--card2); border: 1px solid var(--border2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 12px; }
+        
+        .timeline { position: relative; padding-left: 24px; }
+        .timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+        .tl-item { position: relative; margin-bottom: 32px; }
+        .tl-dot { position: absolute; left: -24px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--card); border: 2px solid var(--border2); }
+        .tl-item.completed .tl-dot { background: var(--success); border-color: var(--success); }
+        .tl-item.active .tl-dot { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(232,131,58,0.4); } 70% { box-shadow: 0 0 0 10px rgba(232,131,58,0); } 100% { box-shadow: 0 0 0 0 rgba(232,131,58,0); } }
+
+        .calc-input { background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: var(--radius-sm); font-family: 'DM Mono'; width: 100%; margin-top: 4px; }
+        
+        .level-prof { color: var(--primary); }
+        .level-ama { color: var(--warning); }
+        .level-amb { color: var(--purple); }
+        .level-amc { color: var(--info); }
+        .level-ini { color: var(--success); }
+        .level-apr { color: var(--gray); }
+
+        .bug-box { background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); padding: 20px; border-radius: var(--radius); }
+        pre { background: rgba(0,0,0,0.3); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); overflow-x: auto; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text2); margin-top: 12px; }
+
+        @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 900px) { :root { --sidebar-w: 70px; } .sidebar span, .logo span, .nav-group { display: none; } .user-profile div { display: none; } .nav-item { justify-content: center; padding: 16px; } .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <span style="font-size: 24px;">🏐</span> <span>QuadraHub</span>
+        </div>
+        
+        <div style="flex: 1; overflow-y: auto;">
+            <div class="nav-group">Principal</div>
+            <div class="nav-item active" data-page="visao-geral">
+                <div class="nav-item-left"><span>⚡</span> <span>Visão Geral</span></div>
+                <div class="badge badge-danger badge-dot">3</div>
+            </div>
+            <div class="nav-item" data-page="financeiro">
+                <div class="nav-item-left"><span>💰</span> <span>Financeiro</span></div>
+                <div class="badge badge-warning badge-dot">!</div>
+            </div>
+            <div class="nav-item" data-page="lgpd">
+                <div class="nav-item-left"><span>🛡️</span> <span>Proteção & LGPD</span></div>
+                <div class="badge badge-danger badge-dot">4</div>
+            </div>
+
+            <div class="nav-group">Plataforma</div>
+            <div class="nav-item" data-page="campeonatos">
+                <div class="nav-item-left"><span>🏆</span> <span>Campeonatos</span></div>
+            </div>
+            <div class="nav-item" data-page="atletas">
+                <div class="nav-item-left"><span>👤</span> <span>Atletas</span></div>
+            </div>
+            <div class="nav-item" data-page="organizadores">
+                <div class="nav-item-left"><span>📋</span> <span>Organizadores</span></div>
+                <div class="badge badge-warning badge-dot">2</div>
+            </div>
+            <div class="nav-item" data-page="elo">
+                <div class="nav-item-left"><span>🏐</span> <span>Partidas & ELO</span></div>
+            </div>
+
+            <div class="nav-group">Estratégia</div>
+            <div class="nav-item" data-page="monetizacao">
+                <div class="nav-item-left"><span>🚀</span> <span>Monetização</span></div>
+            </div>
+            <div class="nav-item" data-page="roadmap">
+                <div class="nav-item-left"><span>🗺️</span> <span>Roadmap</span></div>
+            </div>
+            <div class="nav-item" data-page="bugs">
+                <div class="nav-item-left"><span>🐛</span> <span>Bugs & Técnico</span></div>
+                <div class="badge badge-danger badge-dot">1</div>
+            </div>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar">A</div>
+            <div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text);">Admin Principal</div>
+                <div style="font-size: 12px; color: var(--text2);">System Role</div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="header">
+            <h2 class="display-font" id="header-title">Visão Geral</h2>
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <span class="badge badge-primary">V 1.0.4 - Beta</span>
+                <span style="color: var(--text2); font-size: 14px;" class="data-font">Mai 2025</span>
+            </div>
+        </header>
+
+        <div class="content">
+            
+            <!-- PAGE 1: VISÃO GERAL -->
+            <div id="page-visao-geral" class="page active">
+                <div class="alert alert-danger">
+                    <strong>⚠️ 4 ações urgentes:</strong> Bug em produção (ELO não processa wins/losses) · 2 disputas pendentes · Política de privacidade ausente · 2 organizadores sem verificação.
+                </div>
+
+                <div class="grid-4">
+                    <div class="card">
+                        <div class="kpi-title">Atletas Ativos</div>
+                        <div class="kpi-val data-font">847</div>
+                        <div class="kpi-sub text-success">↑ +12% vs mês anterior</div>
+                    </div>
+                    <div class="card">
+                        <div class="kpi-title">Campeonatos Ativos</div>
+                        <div class="kpi-val data-font">14</div>
+                        <div class="kpi-sub text-info">+4 este mês</div>
+                    </div>
+                    <div class="card" style="border-color: rgba(239,68,68,0.3);">
+                        <div class="kpi-title">Receita Atual</div>
+                        <div class="kpi-val data-font">R$ 0,00</div>
+                        <div class="kpi-sub text-danger">⚠️ Sem cobrança configurada</div>
+                    </div>
+                    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+                        <div class="kpi-title">Score LGPD</div>
+                        <div class="kpi-val data-font">42%</div>
+                        <div class="kpi-sub text-warning">Risco Alto</div>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="card" style="grid-column: span 2;">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Crescimento de Atletas</h3>
+                        <div class="chart-container"><canvas id="chartGrowth"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Status do Sistema</h3>
+                        <ul class="checklist" style="margin-bottom: 24px;">
+                            <li><span class="check-icon badge-success">✓</span> BD Supabase: Online</li>
+                            <li><span class="check-icon badge-success">✓</span> Autenticação: OK</li>
+                            <li><span class="check-icon badge-success">✓</span> Realtime: 3 tabelas</li>
+                            <li><span class="check-icon badge-danger">✗</span> Bug ELO: RPC ausente</li>
+                            <li><span class="check-icon badge-danger">✗</span> Pagamentos: Não conf.</li>
+                            <li><span class="check-icon badge-danger">✗</span> LGPD: Política ausente</li>
+                            <li><span class="check-icon badge-warning">!</span> Backup: Manual</li>
+                        </ul>
+                        <div class="chart-container" style="height: 150px;"><canvas id="chartTournaments"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 16px;">Atividade Recente</h3>
+                    <ul class="checklist">
+                        <li><span class="badge badge-gray">2h atrás</span> ✅ Campeonato Verão SP finalizou — Lucas & Thiago venceram</li>
+                        <li><span class="badge badge-warning">4h atrás</span> ⚠️ Disputa de resultado aberta — quartas do Copa RJ</li>
+                        <li style="color: var(--danger);"><span class="badge badge-danger">6h atrás</span> 🐛 ERRO: match_id xyz123 — ELO não processado (wins/losses)</li>
+                        <li><span class="badge badge-primary">6h atrás</span> 👤 23 novos atletas cadastrados hoje</li>
+                        <li><span class="badge badge-info">8h atrás</span> 🏆 Novo campeonato aguarda aprovação — Beach Arena RJ</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PAGE 2: FINANCEIRO -->
+            <div id="page-financeiro" class="page">
+                <div class="alert alert-warning">
+                    <strong>Alerta:</strong> 847 atletas, 14 campeonatos, R$0 de receita. Cada mês sem cobrança = oportunidade perdida.
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 20px; font-size: 16px;">Fluxo de Receita Proposto</h3>
+                    <div class="flow-diagram">
+                        <div class="flow-step"><div class="icon">🏃</div><div class="data-font">Atleta</div><div style="font-size: 12px; color: var(--text2);">R$ 29/mês</div></div>
+                        <div style="color: var(--border2);">→</div>
+                        <div class="flow-step"><div class="icon">📋</div><div class="data-font">Organizador</div><div style="font-size: 12px; color: var(--text2);">R$ 99/mês</div></div>
+                        <div style="color: var(--border2);">→</div>
+                        <div class="flow-step"><div class="icon" style="color: var(--primary); border-color: var(--primary);">🏆</div><div class="data-font">Campeonato</div><div style="font-size: 12px; color: var(--text2);">5% taxa</div></div>
+                        <div style="color: var(--border2);">→</div>
+                        <div class="flow-step"><div class="icon" style="color: var(--gold); border-color: var(--gold);">⭐</div><div class="data-font">Selo Oficial</div><div style="font-size: 12px; color: var(--text2);">R$ 199</div></div>
+                        <div style="color: var(--border2);">→</div>
+                        <div class="flow-step"><div class="icon" style="background: var(--success-bg); color: var(--success);">💰</div><div class="data-font">Total Est.</div><div style="font-size: 12px; color: var(--success);">~R$ 4.055/mês</div></div>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="card" style="text-align: center;">
+                        <h3 style="color: var(--text2); font-size: 16px;">Atleta Free</h3>
+                        <div class="display-font" style="font-size: 32px; margin: 16px 0;">R$ 0</div>
+                        <ul class="checklist" style="text-align: left; font-size: 13px;">
+                            <li><span class="text-success">✓</span> Perfil e rating ELO</li>
+                            <li><span class="text-success">✓</span> Ranking público</li>
+                            <li><span class="text-danger">✗</span> Notificações push</li>
+                            <li><span class="text-danger">✗</span> Estatísticas avançadas</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="text-align: center; border-color: var(--primary); transform: scale(1.02); box-shadow: 0 0 30px rgba(232,131,58,0.1);">
+                        <div class="badge badge-primary" style="position: absolute; top: 12px; right: 12px;">MAIS POPULAR</div>
+                        <h3 style="color: var(--primary); font-size: 16px;">Atleta Premium</h3>
+                        <div class="display-font" style="font-size: 32px; margin: 16px 0;">R$ 29<span style="font-size: 14px; color: var(--text2);">/mês</span></div>
+                        <ul class="checklist" style="text-align: left; font-size: 13px;">
+                            <li><span class="text-success">✓</span> Tudo do Free</li>
+                            <li><span class="text-success">✓</span> Notificações push</li>
+                            <li><span class="text-success">✓</span> Estatísticas avançadas</li>
+                            <li><span class="text-success">✓</span> Histórico completo ELO</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <h3 style="color: var(--text2); font-size: 16px;">Organizador Pro</h3>
+                        <div class="display-font" style="font-size: 32px; margin: 16px 0;">R$ 99<span style="font-size: 14px; color: var(--text2);">/mês</span></div>
+                        <ul class="checklist" style="text-align: left; font-size: 13px;">
+                            <li><span class="text-success">✓</span> Campeonatos ilimitados</li>
+                            <li><span class="text-success">✓</span> Cobrança automatizada</li>
+                            <li><span class="text-success">✓</span> Selo verificado</li>
+                            <li><span class="text-success">✓</span> Candidatar Oficial</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Taxas Não Cobradas (Mês Atual)</h3>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead><tr><th>Campeonato</th><th>Inscrições</th><th>Taxa/dupla</th><th>Taxa 5%</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Open Verão SP</td><td>12/16</td><td>R$ 150</td><td class="text-danger data-font">R$ 90,00</td></tr>
+                                    <tr><td>Copa RJ Amador</td><td>5/8</td><td>R$ 80</td><td class="text-danger data-font">R$ 20,00</td></tr>
+                                    <tr><td>BH Open 2025</td><td>18/24</td><td>R$ 250</td><td class="text-danger data-font">R$ 225,00</td></tr>
+                                    <tr><td>Torneio CWB</td><td>3/8</td><td>R$ 50</td><td class="text-danger data-font">R$ 7,50</td></tr>
+                                    <tr style="border-top: 1px solid var(--border); font-weight: bold;"><td colspan="3" style="text-align: right;">Total Perdido:</td><td class="text-danger data-font">R$ 342,50</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Projeção de Receita (6 Meses)</h3>
+                        <div class="chart-container"><canvas id="chartRevenueBars"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: LGPD -->
+            <div id="page-lgpd" class="page">
+                <div class="grid-2">
+                    <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <h3 style="margin-bottom: 24px; font-size: 16px;">Score de Conformidade LGPD</h3>
+                        <div class="score-ring">
+                            <svg><circle class="bg" cx="60" cy="60" r="50"></circle><circle class="progress" cx="60" cy="60" r="50"></circle></svg>
+                            <div class="val">42%</div>
+                        </div>
+                        <p class="text-warning" style="margin-top: 24px; font-weight: 600;">Risco Alto de Penalidade Legal</p>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Checklist LGPD</h3>
+                        <ul class="checklist" style="font-size: 13px;">
+                            <li><span class="badge badge-success badge-dot">✓</span> Autenticação segura (Supabase Auth)</li>
+                            <li><span class="badge badge-success badge-dot">✓</span> RLS ativo + Senhas criptografadas</li>
+                            <li><span class="badge badge-danger badge-dot">✗</span> Política de Privacidade publicada</li>
+                            <li><span class="badge badge-danger badge-dot">✗</span> Consentimento explícito no cadastro</li>
+                            <li><span class="badge badge-danger badge-dot">✗</span> Canal de exclusão de dados</li>
+                            <li><span class="badge badge-warning badge-dot">!</span> DPO definido e Backup criptografado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="font-size: 16px;">Disputas de Resultado (Painel Organizador)</h3>
+                        <span class="badge badge-danger">2 Pendentes</span>
+                    </div>
+                    <div class="grid-2">
+                        <div class="card" style="background: rgba(239,68,68,0.05); border-color: rgba(239,68,68,0.2);">
+                            <div class="badge badge-danger" style="margin-bottom: 12px;">URGENTE</div>
+                            <div style="font-weight: 600; margin-bottom: 8px;">Open Verão SP · Semifinal (há 4h)</div>
+                            <p style="font-size: 13px; color: var(--text2); margin-bottom: 16px; font-style: italic;">"Placar registrado foi 18x16, correto é 16x18. Afeta nosso ELO."</p>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-success btn-sm" onclick="this.textContent='Aprovado'; this.disabled=true; this.className='btn btn-gray btn-sm';">✓ Aprovar</button>
+                                <button class="btn btn-danger btn-sm">✗ Rejeitar</button>
+                                <button class="btn btn-sm">👁 Logs ELO</button>
+                            </div>
+                        </div>
+                        <div class="card" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2);">
+                            <div class="badge badge-warning" style="margin-bottom: 12px;">MODERADO</div>
+                            <div style="font-weight: 600; margin-bottom: 8px;">Copa RJ · Grupo A R2 (há 2 dias)</div>
+                            <p style="font-size: 13px; color: var(--text2); margin-bottom: 16px; font-style: italic;">"Partida marcada como jogada mas oponente não compareceu. Pedimos W.O."</p>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-success btn-sm" onclick="this.textContent='Concedido'; this.disabled=true; this.className='btn btn-gray btn-sm';">✓ Dar W.O.</button>
+                                <button class="btn btn-danger btn-sm">✗ Rejeitar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="font-size: 16px;">Mapeamento de Dados Sensíveis</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead><tr><th>Dado</th><th>Visível para</th><th>Criptografado</th><th>Risco</th></tr></thead>
+                            <tbody>
+                                <tr><td>Email / Senha</td><td>Admin + user / Nunca</td><td><span class="badge badge-success">Sim (Bcrypt)</span></td><td>Baixo</td></tr>
+                                <tr><td>Nome / Cidade</td><td>TODOS (Público)</td><td><span class="badge badge-danger">Não</span></td><td><span class="text-warning">Médio</span> (Falta opt-out)</td></tr>
+                                <tr><td>Telefone</td><td>Admin + user</td><td><span class="badge badge-danger">Não</span></td><td><span class="text-warning">Médio</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 4: CAMPEONATOS -->
+            <div id="page-campeonatos" class="page">
+                <div class="grid-4">
+                    <div class="card"><div class="kpi-title">Em andamento</div><div class="kpi-val text-success">6</div></div>
+                    <div class="card"><div class="kpi-title">Inscrições Abertas</div><div class="kpi-val text-info">5</div></div>
+                    <div class="card"><div class="kpi-title">Rascunho</div><div class="kpi-val text-warning">3</div></div>
+                    <div class="card"><div class="kpi-title">Finalizados</div><div class="kpi-val" style="color: var(--text2);">18</div></div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>Alerta:</strong> Função de geração automática de chaveamento (bracket) não implementada — organizador cria partidas manualmente. Alta prioridade para V2.
+                </div>
+
+                <div class="grid-3">
+                    <div class="card" style="grid-column: span 2;">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Tabela de Campeonatos Ativos</h3>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead><tr><th>Nome</th><th>Formato</th><th>Vagas</th><th>Status</th><th>Oficial</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Open Verão SP 2025</td><td>Grupos+MM (Profissional)</td><td>12/16</td><td><span class="badge badge-success">Em andamento</span></td><td>⭐</td></tr>
+                                    <tr><td>Copa RJ Amador</td><td>Elim. Direta (Amador)</td><td>5/8</td><td><span class="badge badge-info">Aberto</span></td><td>-</td></tr>
+                                    <tr><td>BH Open 2025</td><td>Grupos+MM (Profissional)</td><td>18/24</td><td><span class="badge badge-success">Em andamento</span></td><td>⭐</td></tr>
+                                    <tr><td>Torneio Iniciantes CWB</td><td>Elim. Direta (Misto)</td><td>3/8</td><td><span class="badge badge-info">Aberto</span></td><td>-</td></tr>
+                                    <tr><td>Circuito Nordeste #3</td><td>Grupos+MM (Amador)</td><td>0/12</td><td><span class="badge badge-warning">Rascunho</span></td><td>-</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Distribuição por Estado</h3>
+                        <div class="chart-container"><canvas id="chartStates"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 5: ATLETAS -->
+            <div id="page-atletas" class="page">
+                <div class="grid-4">
+                    <div class="card"><div class="kpi-title">Total de Atletas</div><div class="kpi-val data-font">847</div><div class="kpi-sub text-success">+94 este mês</div></div>
+                    <div class="card"><div class="kpi-title">Profissional (1600+)</div><div class="kpi-val data-font" style="color: var(--primary);">12</div><div class="kpi-sub">1.4% do total</div></div>
+                    <div class="card"><div class="kpi-title">Amador A (1400+)</div><div class="kpi-val data-font" style="color: var(--warning);">48</div><div class="kpi-sub">5.7% do total</div></div>
+                    <div class="card"><div class="kpi-title">Ativos 7 dias</div><div class="kpi-val data-font">312</div></div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Top 10 Ranking Nacional</h3>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead><tr><th>#</th><th>Atleta</th><th>Nível</th><th>Rating</th></tr></thead>
+                                <tbody>
+                                    <tr><td>🥇</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="avatar" style="width:24px;height:24px;font-size:10px;">LT</div>Lucas Torres <span style="font-size:11px;color:var(--text2);">SP</span></div></td><td><span class="badge" style="background:var(--primary-glow);color:var(--primary);">Profissional</span></td><td class="data-font">1847 <span class="text-success" style="font-size:10px;">▲24</span></td></tr>
+                                    <tr><td>🥈</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="avatar" style="width:24px;height:24px;font-size:10px;">MF</div>Mariana Freitas <span style="font-size:11px;color:var(--text2);">RJ</span></div></td><td><span class="badge" style="background:var(--primary-glow);color:var(--primary);">Profissional</span></td><td class="data-font">1792 <span class="text-success" style="font-size:10px;">▲12</span></td></tr>
+                                    <tr><td>🥉</td><td><div style="display:flex; align-items:center; gap:8px;"><div class="avatar" style="width:24px;height:24px;font-size:10px;">RS</div>Rafael Souza <span style="font-size:11px;color:var(--text2);">MG</span></div></td><td><span class="badge" style="background:var(--primary-glow);color:var(--primary);">Profissional</span></td><td class="data-font">1765 <span class="text-danger" style="font-size:10px;">▼8</span></td></tr>
+                                    <tr><td>4</td><td>Ana Costa</td><td><span class="badge" style="background:var(--primary-glow);color:var(--primary);">Profissional</span></td><td class="data-font">1654</td></tr>
+                                    <tr><td>5</td><td>Pedro Oliveira</td><td><span class="badge" style="background:var(--primary-glow);color:var(--primary);">Profissional</span></td><td class="data-font">1621</td></tr>
+                                    <tr><td>6</td><td>Beatriz Nunes</td><td><span class="badge" style="background:var(--warning-bg);color:var(--warning);">Amador A</span></td><td class="data-font">1587</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="card" style="margin-bottom: 24px;">
+                            <h3 style="margin-bottom: 20px; font-size: 16px;">Distribuição por Nível ELO</h3>
+                            <div style="display: flex; gap: 24px;">
+                                <div class="chart-container" style="height: 180px; width: 180px; flex-shrink: 0;"><canvas id="chartLevels"></canvas></div>
+                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; font-size: 12px;">
+                                    <div><div style="display:flex;justify-content:space-between;"><span>Profissional</span><span>12 (1.4%)</span></div><div class="progress-bar"><div class="progress-fill" style="width: 1.4%; background: var(--primary);"></div></div></div>
+                                    <div><div style="display:flex;justify-content:space-between;"><span>Amador A</span><span>48 (5.7%)</span></div><div class="progress-bar"><div class="progress-fill" style="width: 5.7%; background: var(--warning);"></div></div></div>
+                                    <div><div style="display:flex;justify-content:space-between;"><span>Amador B</span><span>143 (16.9%)</span></div><div class="progress-bar"><div class="progress-fill" style="width: 16.9%; background: var(--purple);"></div></div></div>
+                                    <div><div style="display:flex;justify-content:space-between;"><span>Amador C</span><span>312 (36.8%)</span></div><div class="progress-bar"><div class="progress-fill" style="width: 36.8%; background: var(--info);"></div></div></div>
+                                    <div><div style="display:flex;justify-content:space-between;"><span>Iniciante</span><span>245 (28.9%)</span></div><div class="progress-bar"><div class="progress-fill" style="width: 28.9%; background: var(--success);"></div></div></div>
+                                    <div><div style="display:flex;justify-content:space-between;"><span>Aprendiz</span><span>87 (10.3%)</span></div><div class="progress-bar"><div class="progress-fill" style="width: 10.3%; background: var(--gray);"></div></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="margin-bottom: 16px; font-size: 16px; display: flex; align-items: center; gap: 8px;">📟 Calculadora ELO Ao Vivo</h3>
+                            <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+                                <div><label style="font-size: 12px; color: var(--text2);">Rating Dupla A</label><input type="number" id="calc-ra" class="calc-input" value="1500" oninput="runElo()"></div>
+                                <div><label style="font-size: 12px; color: var(--text2);">Rating Dupla B</label><input type="number" id="calc-rb" class="calc-input" value="1400" oninput="runElo()"></div>
+                                <div><label style="font-size: 12px; color: var(--text2);">Placar A</label><input type="number" id="calc-sa" class="calc-input" value="18" oninput="runElo()"></div>
+                                <div><label style="font-size: 12px; color: var(--text2);">Placar B</label><input type="number" id="calc-sb" class="calc-input" value="14" oninput="runElo()"></div>
+                            </div>
+                            <label style="font-size: 13px; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; cursor: pointer;">
+                                <input type="checkbox" id="calc-off" onchange="runElo()" checked> Campeonato Oficial (1.5x)
+                            </label>
+                            
+                            <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: var(--radius-sm); border: 1px dashed var(--border2); font-family: 'DM Mono'; font-size: 13px;">
+                                <div style="margin-bottom: 8px; color: var(--text2);" id="calc-prob">Probabilidade esperada: A tem 64% de chance</div>
+                                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px;">
+                                    <span class="text-success">Se A ganhar: <b id="calc-aw">...</b></span>
+                                    <span class="text-danger">Se B ganhar: <b id="calc-bw">...</b></span>
+                                </div>
+                                <div style="color: var(--text2); font-size: 11px;" id="calc-mult">Multiplicador de placar: 1.0 (Dominante)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 6: ORGANIZADORES -->
+            <div id="page-organizadores" class="page">
+                <div class="alert alert-warning"><strong>Aviso:</strong> 2 organizadores aguardam verificação de identidade. Sem isso, podem criar campeonatos oficiais falsos que afetam o ELO global.</div>
+                
+                <div class="grid-4">
+                    <div class="card"><div class="kpi-title">Total Cadastrados</div><div class="kpi-val">12</div></div>
+                    <div class="card"><div class="kpi-title">Verificados</div><div class="kpi-val text-success">9</div></div>
+                    <div class="card"><div class="kpi-title">Pendentes</div><div class="kpi-val text-warning">2</div></div>
+                    <div class="card"><div class="kpi-title">Receita do Segmento</div><div class="kpi-val text-danger data-font">R$ 0</div></div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 16px;">Tabela de Organizadores</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead><tr><th>Organizador</th><th>Email</th><th>Cid.</th><th>Camp.</th><th>Atletas</th><th>Status</th><th>Ação</th></tr></thead>
+                            <tbody>
+                                <tr><td>Beach Arena SP</td><td>contato@beacharenasp.com</td><td>SP</td><td>8</td><td>184</td><td><span class="badge badge-success">Verificado</span></td><td><button class="btn btn-sm">Ver</button></td></tr>
+                                <tr><td>Carlos Mendes</td><td>carlos@beachrj.com</td><td>RJ</td><td>3</td><td>56</td><td><span class="badge badge-warning" id="org-status-1">Pendente</span></td><td><button class="btn btn-sm btn-success" onclick="document.getElementById('org-status-1').className='badge badge-success'; document.getElementById('org-status-1').innerText='Verificado'; this.disabled=true;">✓</button> <button class="btn btn-sm btn-danger">✗</button></td></tr>
+                                <tr><td>Fernanda Lima</td><td>fernanda@arenasp.com</td><td>SP</td><td>1</td><td>12</td><td><span class="badge badge-info" id="org-status-2">Em Análise</span></td><td><button class="btn btn-sm btn-success" onclick="document.getElementById('org-status-2').className='badge badge-success'; document.getElementById('org-status-2').innerText='Verificado'; this.disabled=true;">✓</button> <button class="btn btn-sm btn-danger">✗</button></td></tr>
+                                <tr><td>Arena BH</td><td>contato@arenabh.com</td><td>MG</td><td>5</td><td>143</td><td><span class="badge badge-success">Verificado</span></td><td><button class="btn btn-sm">Ver</button></td></tr>
+                                <tr><td>Nordeste Beach</td><td>nordeste@beach.com</td><td>BA</td><td>2</td><td>38</td><td><span class="badge badge-success">Verificado</span></td><td><button class="btn btn-sm">Ver</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 7: PARTIDAS & ELO -->
+            <div id="page-elo" class="page">
+                <div class="grid-4">
+                    <div class="card"><div class="kpi-title">Partidas Registradas</div><div class="kpi-val data-font">423</div></div>
+                    <div class="card"><div class="kpi-title">ELO Processado</div><div class="kpi-val text-success data-font">398 <span style="font-size: 14px;">(94%)</span></div></div>
+                    <div class="card" style="border-color: rgba(239,68,68,0.5);"><div class="kpi-title">Não Processado (BUG)</div><div class="kpi-val text-danger data-font">25</div></div>
+                    <div class="card"><div class="kpi-title">Partidas este mês</div><div class="kpi-val data-font">87</div></div>
+                </div>
+
+                <div class="bug-box" style="margin-bottom: 24px;">
+                    <h3 style="color: var(--danger); font-size: 16px; margin-bottom: 8px;">🚨 BUG #001 — PRODUÇÃO — CRÍTICO</h3>
+                    <p style="font-size: 14px; line-height: 1.6;">
+                        <strong>Função:</strong> <code>increment_match_stats</code><br>
+                        <strong>Arquivo:</strong> <code>src/app/api/championships/[id]/matches/route.ts</code><br>
+                        <strong>Impacto:</strong> A RPC é chamada mas não existe na migration SQL do Supabase. O dashboard de atletas exibe vitórias/derrotas como 0. 25 partidas já foram afetadas em produção.
+                    </p>
+                    <pre>CREATE OR REPLACE FUNCTION public.increment_match_stats(
+  p_user_id uuid, p_new_rating integer, p_new_level text, p_won boolean
+) RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE public.athlete_profiles SET
+    wins = wins + CASE WHEN p_won THEN 1 ELSE 0 END,
+    losses = losses + CASE WHEN NOT p_won THEN 1 ELSE 0 END,
+    total_matches = total_matches + 1, rating = p_new_rating, level = p_new_level
+  WHERE user_id = p_user_id;
+END;
+$$;</pre>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 16px;">Log de Partidas Recentes</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead><tr><th>Data</th><th>Campeonato</th><th>Fase</th><th>Confronto</th><th>Placar</th><th>Status ELO</th><th>Delta</th></tr></thead>
+                            <tbody>
+                                <tr><td>Hoje 10:30</td><td>Open Verão SP</td><td>Final</td><td>Torres & Nunes vs Costa & Oliveira</td><td class="data-font">18 × 14</td><td><span class="badge badge-success">Processado</span></td><td class="data-font text-success">+22 / -18</td></tr>
+                                <tr><td>Hoje 09:15</td><td>Copa RJ</td><td>Semi</td><td>Lima & Rocha vs Santos & Mendes</td><td class="data-font">18 × 16</td><td><span class="badge badge-success">Processado</span></td><td class="data-font text-success">+12 / -14</td></tr>
+                                <tr><td>Ontem</td><td>BH Open</td><td>Quartas</td><td>Silva & Alves vs Mendes & Costa</td><td class="data-font">18 × 12</td><td><span class="badge badge-danger">BUG: Não atualizado</span></td><td class="data-font">—</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 8: MONETIZAÇÃO -->
+            <div id="page-monetizacao" class="page">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Projeção de Receita (12 Meses)</h3>
+                        <div class="chart-container" style="height: 350px;"><canvas id="chartRevenueLines"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px; font-size: 16px;">Checklist de Implementação</h3>
+                        
+                        <div class="nav-group" style="padding-left: 0;">Prioridade 1 — Bloqueadores (Nesta semana)</div>
+                        <ul class="checklist" style="font-size: 13px;">
+                            <li><span class="check-icon badge-danger">✗</span> Corrigir bug increment_match_stats em prod.</li>
+                            <li><span class="check-icon badge-danger">✗</span> Resolver 2 disputas de resultado pendentes</li>
+                            <li><span class="check-icon badge-danger">✗</span> Verificar 2 organizadores bloqueados</li>
+                        </ul>
+
+                        <div class="nav-group" style="padding-left: 0; margin-top: 16px;">Prioridade 2 — Proteção Legal (2 semanas)</div>
+                        <ul class="checklist" style="font-size: 13px;">
+                            <li><span class="check-icon badge-danger">✗</span> Publicar Política de Privacidade (iubenda.com)</li>
+                            <li><span class="check-icon badge-danger">✗</span> Adicionar checkbox de consentimento (/cadastro)</li>
+                            <li><span class="check-icon badge-danger">✗</span> Criar fluxo de exclusão de dados</li>
+                        </ul>
+
+                        <div class="nav-group" style="padding-left: 0; margin-top: 16px;">Prioridade 3 — Receita (1 mês)</div>
+                        <ul class="checklist" style="font-size: 13px;">
+                            <li><span class="check-icon badge-danger">✗</span> Integração Asaas (Gateway BR, PIX Nativo)</li>
+                            <li><span class="check-icon badge-danger">✗</span> Lançar plano Organizador Pro (R$99/mês)</li>
+                            <li><span class="check-icon badge-danger">✗</span> Lançar Atleta Premium (R$29/mês)</li>
+                            <li><span class="check-icon badge-danger">✗</span> Taxa 5% por inscrição em campeonatos pagos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 9: ROADMAP -->
+            <div id="page-roadmap" class="page">
+                <div class="card" style="max-width: 800px; margin: 0 auto;">
+                    <h3 style="margin-bottom: 32px; font-size: 20px; text-align: center;">Evolução do Produto QuadraHub</h3>
+                    
+                    <div class="timeline">
+                        <div class="tl-item completed">
+                            <div class="tl-dot"></div>
+                            <h4 style="color: var(--success); margin-bottom: 8px;">FASE 1 — MVP da Plataforma (CONCLUÍDO ✅)</h4>
+                            <ul style="font-size: 14px; color: var(--text2); margin-left: 16px; line-height: 1.6;">
+                                <li>Auth (login/cadastro com roles)</li>
+                                <li>Sistema ELO completo (K=32, oficiais 1.5x)</li>
+                                <li>6 níveis de rating com cores</li>
+                                <li>Ranking nacional filtrável por cidade</li>
+                                <li>Campeonatos (criar, inscrever duplas, lançar resultados)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="tl-item active">
+                            <div class="tl-dot"></div>
+                            <h4 style="color: var(--primary); margin-bottom: 8px;">FASE 2 — Proteção & Confiança (EM ANDAMENTO 🔄)</h4>
+                            <ul style="font-size: 14px; color: var(--text2); margin-left: 16px; line-height: 1.6;">
+                                <li><strong style="color:var(--text);">Corrigir bug increment_match_stats</strong></li>
+                                <li>LGPD compliance (política + consentimento)</li>
+                                <li>Verificação de organizadores</li>
+                                <li>Sistema de disputas de resultado</li>
+                            </ul>
+                        </div>
+
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <h4 style="color: var(--text); margin-bottom: 8px;">FASE 3 — Monetização (PRÓXIMO ⭕)</h4>
+                            <ul style="font-size: 14px; color: var(--text2); margin-left: 16px; line-height: 1.6;">
+                                <li>Integração Asaas (PIX + cartão)</li>
+                                <li>Plano Atleta Premium R$29/mês</li>
+                                <li>Plano Organizador Pro R$99/mês</li>
+                                <li>Taxa 5% por inscrição & Selo Oficial R$199</li>
+                            </ul>
+                        </div>
+
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <h4 style="color: var(--text); margin-bottom: 8px;">FASE 4 — Produto Completo (FUTURO ⭕)</h4>
+                            <ul style="font-size: 14px; color: var(--text2); margin-left: 16px; line-height: 1.6;">
+                                <li>App React Native (assets já existem)</li>
+                                <li>Geração automática de bracket</li>
+                                <li>Notificações push (Realtime ativo)</li>
+                                <li>Paginação e busca avançada</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 10: BUGS -->
+            <div id="page-bugs" class="page">
+                <div class="grid-2">
+                    <div class="bug-box">
+                        <h4 style="color: var(--danger); margin-bottom: 8px;">🚨 BUG #001 — PRODUÇÃO</h4>
+                        <p style="font-size: 13px; color: var(--text); margin-bottom: 8px;"><strong>increment_match_stats missing RPC</strong></p>
+                        <p style="font-size: 13px; color: var(--text2);">Quando uma partida é submetida, o ELO do rating é atualizado no JS, mas wins/losses dos atletas NÃO são atualizados porque a função SQL não existe no DB.</p>
+                        <div style="margin-top: 12px;"><span class="badge badge-danger">Alta Prioridade</span> <span class="badge badge-gray">Backend</span></div>
+                    </div>
+                    
+                    <div class="card" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2);">
+                        <h4 style="color: var(--warning); margin-bottom: 8px;">⚠️ ISSUE #002 — RANKING</h4>
+                        <p style="font-size: 13px; color: var(--text); margin-bottom: 8px;"><strong>Paginação ausente</strong></p>
+                        <p style="font-size: 13px; color: var(--text2);">A query no `/ranking/page.tsx` não tem LIMIT. Com 10k+ atletas, a página vai dar timeout e quebrar. Necessário adicionar <code>.range()</code> no Supabase client.</p>
+                        <div style="margin-top: 12px;"><span class="badge badge-warning">Média</span> <span class="badge badge-gray">Frontend</span></div>
+                    </div>
+
+                    <div class="card" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2);">
+                        <h4 style="color: var(--warning); margin-bottom: 8px;">⚠️ ISSUE #003 — PERFIL</h4>
+                        <p style="font-size: 13px; color: var(--text); margin-bottom: 8px;"><strong>Avatar_url inutilizado</strong></p>
+                        <p style="font-size: 13px; color: var(--text2);">A UI sempre mostra a inicial do nome. O campo existe no banco, mas falta integrar o upload com Supabase Storage.</p>
+                        <div style="margin-top: 12px;"><span class="badge badge-warning">Média</span> <span class="badge badge-gray">Fullstack</span></div>
+                    </div>
+
+                    <div class="card" style="background: rgba(56,189,248,0.05); border-color: rgba(56,189,248,0.2);">
+                        <h4 style="color: var(--info); margin-bottom: 8px;">ℹ️ INFO #005 — REALTIME</h4>
+                        <p style="font-size: 13px; color: var(--text); margin-bottom: 8px;"><strong>Consumer Ausente</strong></p>
+                        <p style="font-size: 13px; color: var(--text2);">A migration ativou o <code>supabase_realtime</code> nas tabelas principais, mas o frontend Next.js não tem nenhum <code>.channel().subscribe()</code> configurado.</p>
+                        <div style="margin-top: 12px;"><span class="badge badge-info">Baixa</span> <span class="badge badge-gray">Frontend</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Data Mock exata do prompt
+        const DATA = {
+          crescimentoMensal: [
+            { mes: 'Jul', atletas: 312 }, { mes: 'Ago', atletas: 398 }, { mes: 'Set', atletas: 487 },
+            { mes: 'Out', atletas: 603 }, { mes: 'Nov', atletas: 698 }, { mes: 'Dez', atletas: 754 }, { mes: 'Jan', atletas: 847 }
+          ],
+          projecaoReceita: [
+            { mes: 'Jan', real: 0, otimista: 0 }, { mes: 'Fev', real: 0, otimista: 0 },
+            { mes: 'Mar', real: 1200, otimista: 2000 }, { mes: 'Abr', real: 2800, otimista: 4500 },
+            { mes: 'Mai', real: 3600, otimista: 6000 }, { mes: 'Jun', real: 4055, otimista: 7500 },
+            { mes: 'Jul', real: 4800, otimista: 9000 }, { mes: 'Ago', real: 5200, otimista: 11000 },
+            { mes: 'Set', real: 6100, otimista: 13500 }, { mes: 'Out', real: 7200, otimista: 16000 },
+            { mes: 'Nov', real: 8400, otimista: 19000 }, { mes: 'Dez', real: 10500, otimista: 24000 }
+          ]
+        };
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                
+                item.classList.add('active');
+                const target = item.getAttribute('data-page');
+                document.getElementById('page-' + target).classList.add('active');
+                document.getElementById('header-title').innerText = item.querySelector('span:nth-child(2)').innerText;
+                
+                // Lazy render charts if visiting page for first time
+                renderCharts(target);
+            });
+        });
+
+        // Global Chart Defaults
+        Chart.defaults.color = '#8B90B8';
+        Chart.defaults.font.family = "'DM Mono', monospace";
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(17,17,32,0.9)';
+        Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.1)';
+        Chart.defaults.plugins.tooltip.borderWidth = 1;
+        Chart.defaults.plugins.tooltip.titleFont = { family: 'Syne', size: 14 };
+
+        let chartsRendered = { geral: false, financeiro: false, campeonatos: false, atletas: false, monetizacao: false };
+
+        function renderCharts(page) {
+            if (page === 'visao-geral' && !chartsRendered.geral) {
+                // Growth Line Chart
+                const ctxG = document.getElementById('chartGrowth').getContext('2d');
+                const gradG = ctxG.createLinearGradient(0, 0, 0, 300);
+                gradG.addColorStop(0, 'rgba(232, 131, 58, 0.4)'); gradG.addColorStop(1, 'rgba(232, 131, 58, 0.0)');
+                new Chart(ctxG, {
+                    type: 'line',
+                    data: {
+                        labels: DATA.crescimentoMensal.map(d => d.mes),
+                        datasets: [{
+                            data: DATA.crescimentoMensal.map(d => d.atletas),
+                            borderColor: '#E8833A', backgroundColor: gradG, fill: true, tension: 0.4, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#E8833A'
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+                });
+
+                // Status Donut
+                new Chart(document.getElementById('chartTournaments'), {
+                    type: 'doughnut',
+                    data: { labels: ['Em Andamento', 'Abertos', 'Rascunho', 'Finalizados'], datasets: [{ data: [6, 5, 3, 18], backgroundColor: ['#22C55E', '#38BDF8', '#F59E0B', '#4A4D6A'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+                });
+                chartsRendered.geral = true;
+            }
+
+            if (page === 'financeiro' && !chartsRendered.financeiro) {
+                new Chart(document.getElementById('chartRevenueBars'), {
+                    type: 'bar',
+                    data: {
+                        labels: DATA.projecaoReceita.slice(0,6).map(d => d.mes),
+                        datasets: [{ label: 'Projeção (R$)', data: DATA.projecaoReceita.slice(0,6).map(d => d.real || d.otimista), backgroundColor: '#F59E0B', borderRadius: 4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+                });
+                chartsRendered.financeiro = true;
+            }
+
+            if (page === 'campeonatos' && !chartsRendered.campeonatos) {
+                new Chart(document.getElementById('chartStates'), {
+                    type: 'bar',
+                    data: { labels: ['SP', 'RJ', 'MG', 'PR', 'BA'], datasets: [{ data: [8, 4, 3, 2, 1], backgroundColor: '#38BDF8', borderRadius: 4 }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } } }
+                });
+                chartsRendered.campeonatos = true;
+            }
+
+            if (page === 'atletas' && !chartsRendered.atletas) {
+                new Chart(document.getElementById('chartLevels'), {
+                    type: 'doughnut',
+                    data: { labels: ['Profissional', 'Amador A', 'Amador B', 'Amador C', 'Iniciante', 'Aprendiz'], datasets: [{ data: [12, 48, 143, 312, 245, 87], backgroundColor: ['#E8833A', '#F59E0B', '#8B5CF6', '#38BDF8', '#22C55E', '#6B7280'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
+                });
+                chartsRendered.atletas = true;
+            }
+
+            if (page === 'monetizacao' && !chartsRendered.monetizacao) {
+                new Chart(document.getElementById('chartRevenueLines'), {
+                    type: 'line',
+                    data: {
+                        labels: DATA.projecaoReceita.map(d => d.mes),
+                        datasets: [
+                            { label: 'Receita Real', data: DATA.projecaoReceita.map(d => d.real), borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.4 },
+                            { label: 'Otimista', data: DATA.projecaoReceita.map(d => d.otimista), borderColor: '#F59E0B', borderDash: [5, 5], tension: 0.4, fill: false }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+                });
+                chartsRendered.monetizacao = true;
+            }
+        }
+
+        // ELO Calculator Logic
+        function calcExpected(ratingA, ratingB) { return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400)); }
+        function calcScoreMultiplier(winScore, loseScore) { const diff = winScore - loseScore; return diff >= 3 ? 1.0 : diff === 2 ? 0.85 : 0.7; }
+        function calcNewRating(current, expected, won, multiplier, official) { const K = 32; const offMult = official ? 1.5 : 1; const delta = K * multiplier * offMult * ((won ? 1 : 0) - expected); return Math.max(Math.round(current + delta), 100); }
+
+        function runElo() {
+            const rA = parseInt(document.getElementById('calc-ra').value) || 0;
+            const rB = parseInt(document.getElementById('calc-rb').value) || 0;
+            const sA = parseInt(document.getElementById('calc-sa').value) || 0;
+            const sB = parseInt(document.getElementById('calc-sb').value) || 0;
+            const off = document.getElementById('calc-off').checked;
+
+            const expA = calcExpected(rA, rB);
+            const expB = calcExpected(rB, rA);
+            document.getElementById('calc-prob').innerText = `Probabilidade esperada: A tem ${Math.round(expA*100)}% de chance`;
+
+            // If A wins
+            const multA = calcScoreMultiplier(Math.max(sA,sB), Math.min(sA,sB));
+            const newRa_winA = calcNewRating(rA, expA, true, multA, off);
+            const newRb_loseA = calcNewRating(rB, expB, false, multA, off);
+            const diffA1 = newRa_winA - rA; const diffA2 = newRb_loseA - rB;
+            document.getElementById('calc-aw').innerText = `+${diffA1} (A) / ${diffA2} (B)`;
+
+            // If B wins
+            const newRb_winB = calcNewRating(rB, expB, true, multA, off);
+            const newRa_loseB = calcNewRating(rA, expA, false, multA, off);
+            const diffB1 = newRb_winB - rB; const diffB2 = newRa_loseB - rA;
+            document.getElementById('calc-bw').innerText = `+${diffB1} (B) / ${diffB2} (A)`;
+
+            let multText = multA === 1.0 ? 'Dominante' : multA === 0.85 ? 'Confortável' : 'Apertada';
+            document.getElementById('calc-mult').innerText = `Multiplicador de placar: ${multA} (${multText})`;
+        }
+
+        // Init
+        renderCharts('visao-geral');
+        runElo();
+    </script>
+</body>
+</html>
