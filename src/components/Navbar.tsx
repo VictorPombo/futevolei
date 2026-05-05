@@ -4,18 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { LayoutDashboard, Trophy, Activity, ClipboardList, Settings, User, LogOut, Menu, X } from "lucide-react";
 
 interface NavbarProps {
-  userName: string;
-  userRole: string;
+  userName?: string;
+  userRole?: string;
 }
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: "📊", roles: ["athlete", "organizer", "admin"] },
-  { href: "/ranking", label: "Ranking", icon: "🏆", roles: ["athlete", "organizer", "admin"] },
-  { href: "/campeonatos", label: "Campeonatos", icon: "🏐", roles: ["athlete", "organizer", "admin"] },
-  { href: "/organizar", label: "Organizar", icon: "📋", roles: ["organizer", "admin"] },
-  { href: "/admin", label: "Admin", icon: "⚙️", roles: ["admin"] },
+  { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} />, roles: ["athlete", "organizer", "admin"] },
+  { href: "/ranking", label: "Ranking", icon: <Trophy size={18} />, roles: ["athlete", "organizer", "admin"] },
+  { href: "/campeonatos", label: "Campeonatos", icon: <Activity size={18} />, roles: ["athlete", "organizer", "admin"] },
+  { href: "/organizar", label: "Organizar", icon: <ClipboardList size={18} />, roles: ["organizer", "admin"] },
+  { href: "/admin", label: "Admin", icon: <Settings size={18} />, roles: ["admin"] },
 ];
 
 export default function Navbar({ userName, userRole }: NavbarProps) {
@@ -24,7 +25,7 @@ export default function Navbar({ userName, userRole }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const filteredItems = NAV_ITEMS.filter((item) =>
-    item.roles.includes(userRole)
+    userRole ? item.roles.includes(userRole) : false
   );
 
   const handleSignOut = async () => {
@@ -71,37 +72,39 @@ export default function Navbar({ userName, userRole }: NavbarProps) {
           </div>
 
           {/* User Menu */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/perfil"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors"
-              style={{
-                background: "var(--color-bg)",
-                border: "1px solid var(--color-border)",
-              }}
-            >
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+          {userName && (
+            <div className="hidden md:flex items-center gap-3">
+              <Link
+                href="/perfil"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors"
                 style={{
-                  background: "var(--color-primary-glow)",
-                  color: "var(--color-primary)",
+                  background: "var(--color-bg)",
+                  border: "1px solid var(--color-border)",
                 }}
               >
-                {userName.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-sm font-medium">{userName.split(" ")[0]}</span>
-            </Link>
-            <button
-              onClick={handleSignOut}
-              className="text-sm px-3 py-1.5 rounded-lg transition-colors"
-              style={{
-                color: "var(--color-text-secondary)",
-                border: "1px solid var(--color-border)",
-              }}
-            >
-              Sair
-            </button>
-          </div>
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{
+                    background: "var(--color-primary-glow)",
+                    color: "var(--color-primary)",
+                  }}
+                >
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-sm font-medium">{userName.split(" ")[0]}</span>
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  color: "var(--color-text-secondary)",
+                  border: "1px solid var(--color-border)",
+                }}
+              >
+                Sair
+              </button>
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <button
@@ -109,7 +112,7 @@ export default function Navbar({ userName, userRole }: NavbarProps) {
             onClick={() => setMobileOpen(!mobileOpen)}
             style={{ color: "var(--color-text)" }}
           >
-            {mobileOpen ? "✕" : "☰"}
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
@@ -142,22 +145,26 @@ export default function Navbar({ userName, userRole }: NavbarProps) {
                 </Link>
               );
             })}
-            <hr style={{ borderColor: "var(--color-border)" }} />
-            <Link
-              href="/perfil"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              👤 Perfil
-            </Link>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm w-full"
-              style={{ color: "var(--color-error)" }}
-            >
-              🚪 Sair
-            </button>
+            {userName && (
+              <>
+                <hr style={{ borderColor: "var(--color-border)" }} />
+                <Link
+                  href="/perfil"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  <User size={18} /> Perfil
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm w-full"
+                  style={{ color: "var(--color-error)" }}
+                >
+                  <LogOut size={18} /> Sair
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

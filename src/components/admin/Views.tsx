@@ -9,8 +9,8 @@ const GrowthChart = dynamic(() => import('./Charts').then(mod => mod.GrowthChart
 const StatusDonut = dynamic(() => import('./Charts').then(mod => mod.StatusDonut), { ssr: false });
 const LevelsDonut = dynamic(() => import('./Charts').then(mod => mod.LevelsDonut), { ssr: false });
 const RevenueBars = dynamic(() => import('./Charts').then(mod => mod.RevenueBars), { ssr: false });
-const RevenueLines = dynamic(() => import('./Charts').then(mod => mod.RevenueLines), { ssr: false });
-const StatesBar = dynamic(() => import('./Charts').then(mod => mod.StatesBar), { ssr: false });
+// const RevenueLines = dynamic(() => import('./Charts').then(mod => mod.RevenueLines), { ssr: false });
+// const StatesBar = dynamic(() => import('./Charts').then(mod => mod.StatesBar), { ssr: false });
 
 export function OverviewView() {
   return (

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
+import { getLevelForRating } from "@/lib/elo";
+import { capitalizeName } from "@/lib/utils";
 
 export default async function ProtectedLayout({
   children,
@@ -24,14 +26,29 @@ export default async function ProtectedLayout({
     .eq("id", user.id)
     .single();
 
-  const userName = userData?.name || user.email || "Usuário";
+  const { data: profile } = await supabase
+    .from("athlete_profiles")
+    .select("rating")
+    .eq("user_id", user.id)
+    .single();
+
+  const userName = capitalizeName(userData?.name || user.email || "Usuário");
   const userRole = userData?.role || "athlete";
+  const rating = profile?.rating ?? 1000;
+  const userLevel = getLevelForRating(rating);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar userName={userName} userRole={userRole} />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
-        {children}
+    <div className="flex h-screen overflow-hidden bg-bg">
+      {/* Sidebar for Desktop */}
+      <div className="hidden md:block">
+        <Sidebar userName={userName} userRole={userRole} userLevel={userLevel} />
+      </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto w-full relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-10">
+          {children}
+        </div>
       </main>
     </div>
   );

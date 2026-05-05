@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { updateProfileSchema } from "@/lib/validators";
 import type { User } from "@/types/database";
 
 export default function ProfileForm({ user }: { user: User }) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: user.name,
     city: user.city,
@@ -37,6 +39,7 @@ export default function ProfileForm({ user }: { user: User }) {
       setMessage({ type: "error", text: "Erro ao salvar. Tente novamente." });
     } else {
       setMessage({ type: "success", text: "Perfil atualizado com sucesso!" });
+      router.refresh();
     }
     setSaving(false);
   };

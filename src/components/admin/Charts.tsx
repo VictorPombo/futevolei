@@ -61,6 +61,7 @@ export function GrowthChart() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <Line data={data} options={options as any} />;
 }
 
@@ -125,6 +126,7 @@ export function RevenueBars() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <Bar data={data} options={options as any} />;
 }
 
@@ -160,6 +162,7 @@ export function RevenueLines() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <Line data={data} options={options as any} />;
 }
 
@@ -184,5 +187,6 @@ export function StatesBar() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <Bar data={data} options={options as any} />;
 }

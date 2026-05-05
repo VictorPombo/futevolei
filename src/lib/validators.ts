@@ -8,7 +8,17 @@ export const signUpSchema = z.object({
   name: z
     .string()
     .min(2, "Nome deve ter pelo menos 2 caracteres")
-    .max(100, "Nome muito longo"),
+    .max(100, "Nome muito longo")
+    .refine((val) => val.trim().split(" ").length >= 2, {
+      message: "Digite seu nome e sobrenome",
+    }),
+  cpf: z
+    .string()
+    .min(11, "CPF inválido")
+    .max(14, "CPF muito longo")
+    .refine((val) => val.replace(/\D/g, "").length === 11, {
+      message: "CPF deve ter 11 dígitos",
+    }),
   email: z.string().email("E-mail inválido"),
   password: z
     .string()
@@ -19,7 +29,7 @@ export const signUpSchema = z.object({
     .string()
     .length(2, "Estado deve ter 2 letras (ex: SP)")
     .toUpperCase(),
-  phone: z.string().optional(),
+  phone: z.string().min(10, "Telefone é obrigatório"),
   role: z.enum(["athlete", "organizer"], {
     message: "Selecione: Atleta ou Organizador",
   }),

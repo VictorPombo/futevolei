@@ -5,10 +5,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { signUpSchema, type SignUpInput } from "@/lib/validators";
+import { Trophy, ClipboardList } from "lucide-react";
 
-export default function CadastroPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<Partial<SignUpInput>>({
+    name: "",
+    cpf: "",
+    email: "",
+    password: "",
+    city: "",
+    state: "",
+    phone: "",
     role: "athlete",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -68,14 +76,16 @@ export default function CadastroPage() {
         id: authData.user.id,
         email: validated.email,
         name: validated.name,
-        phone: validated.phone || null,
+        cpf: validated.cpf,
+        phone: validated.phone,
         city: validated.city,
         state: validated.state.toUpperCase(),
         role: validated.role,
       });
 
       if (insertError) {
-        setGeneralError("Erro ao criar perfil. Tente novamente.");
+        console.error("Insert error:", insertError);
+        setGeneralError(`Erro no banco: ${insertError.message} / ${insertError.details || ""}`);
         setLoading(false);
         return;
       }
@@ -108,7 +118,7 @@ export default function CadastroPage() {
             border: "1px solid var(--color-border)",
           }}
         >
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             {generalError && (
               <div
                 className="p-3 rounded-lg text-sm"
@@ -129,8 +139,8 @@ export default function CadastroPage() {
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: "athlete", label: "🏐 Atleta", desc: "Jogo e quero meu ranking" },
-                  { value: "organizer", label: "📋 Organizador", desc: "Crio campeonatos" },
+                  { value: "athlete", label: "Atleta", Icon: Trophy, desc: "Jogo e quero meu ranking" },
+                  { value: "organizer", label: "Organizador", Icon: ClipboardList, desc: "Crio campeonatos" },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -149,7 +159,10 @@ export default function CadastroPage() {
                       }`,
                     }}
                   >
-                    <div className="text-lg font-semibold">{option.label}</div>
+                    <div className="text-lg font-semibold flex items-center gap-2">
+                      <option.Icon size={20} className="text-[var(--color-primary)]" />
+                      {option.label}
+                    </div>
                     <div className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
                       {option.desc}
                     </div>
@@ -165,13 +178,25 @@ export default function CadastroPage() {
 
             {/* Name */}
             <InputField
-              label="Nome completo"
+              label="Nome e Sobrenome"
               name="name"
               type="text"
-              placeholder="Seu nome"
+              placeholder="Ex: João Silva"
               value={formData.name || ""}
               onChange={handleChange}
               error={errors.name}
+            />
+
+            {/* CPF */}
+            <InputField
+              label="CPF"
+              name="cpf"
+              type="text"
+              placeholder="000.000.000-00"
+              value={formData.cpf || ""}
+              onChange={handleChange}
+              error={errors.cpf}
+              maxLength={14}
             />
 
             {/* Email */}
@@ -199,33 +224,97 @@ export default function CadastroPage() {
             {/* City & State */}
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2">
-                <InputField
-                  label="Cidade"
-                  name="city"
-                  type="text"
-                  placeholder="Sua cidade"
-                  value={formData.city || ""}
-                  onChange={handleChange}
-                  error={errors.city}
-                />
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium mb-1.5 text-text-secondary">
+                    Cidade
+                  </label>
+                  <input
+                    id="city"
+                    name="city"
+                    type="text"
+                    list="brazil-cities"
+                    placeholder="Sua cidade"
+                    value={formData.city || ""}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 rounded-lg text-sm transition-colors outline-none"
+                    style={{
+                      background: "var(--color-bg)",
+                      border: `1px solid ${errors.city ? "var(--color-error)" : "var(--color-border)"}`,
+                      color: "var(--color-text)",
+                    }}
+                  />
+                  <datalist id="brazil-cities">
+                    <option value="São Paulo" />
+                    <option value="Rio de Janeiro" />
+                    <option value="Belo Horizonte" />
+                    <option value="Brasília" />
+                    <option value="Salvador" />
+                    <option value="Fortaleza" />
+                    <option value="Curitiba" />
+                    <option value="Manaus" />
+                    <option value="Recife" />
+                    <option value="Porto Alegre" />
+                    <option value="Goiânia" />
+                    <option value="Belém" />
+                    <option value="Guarulhos" />
+                    <option value="Campinas" />
+                    <option value="São Luís" />
+                    <option value="Maceió" />
+                    <option value="Natal" />
+                    <option value="Teresina" />
+                    <option value="João Pessoa" />
+                    <option value="Aracaju" />
+                    <option value="Cuiabá" />
+                    <option value="Campo Grande" />
+                    <option value="Florianópolis" />
+                    <option value="Vitória" />
+                    <option value="Macapá" />
+                    <option value="Rio Branco" />
+                    <option value="Porto Velho" />
+                    <option value="Boa Vista" />
+                    <option value="Palmas" />
+                  </datalist>
+                  {errors.city && (
+                    <p className="text-xs mt-1" style={{ color: "var(--color-error)" }}>
+                      {errors.city}
+                    </p>
+                  )}
+                </div>
               </div>
               <div>
-                <InputField
-                  label="Estado"
-                  name="state"
-                  type="text"
-                  placeholder="SP"
-                  value={formData.state || ""}
-                  onChange={handleChange}
-                  error={errors.state}
-                  maxLength={2}
-                />
+                <div>
+                  <label htmlFor="state" className="block text-sm font-medium mb-1.5 text-text-secondary">
+                    Estado
+                  </label>
+                  <select
+                    id="state"
+                    name="state"
+                    value={formData.state || ""}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 rounded-lg text-sm transition-colors outline-none"
+                    style={{
+                      background: "var(--color-bg)",
+                      border: `1px solid ${errors.state ? "var(--color-error)" : "var(--color-border)"}`,
+                      color: formData.state ? "var(--color-text)" : "var(--color-text-secondary)",
+                    }}
+                  >
+                    <option value="" disabled>UF</option>
+                    {["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"].map(uf => (
+                      <option key={uf} value={uf}>{uf}</option>
+                    ))}
+                  </select>
+                  {errors.state && (
+                    <p className="text-xs mt-1" style={{ color: "var(--color-error)" }}>
+                      {errors.state}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Phone */}
             <InputField
-              label="Telefone (opcional)"
+              label="Telefone"
               name="phone"
               type="tel"
               placeholder="(11) 99999-9999"
@@ -238,7 +327,7 @@ export default function CadastroPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-lg font-semibold text-base transition-all duration-200 disabled:opacity-50"
+              className="w-full py-3 rounded-lg font-semibold text-base transition-all duration-200 disabled:opacity-50 cursor-pointer hover:brightness-110"
               style={{
                 background: "var(--color-primary)",
                 color: "var(--color-bg)",

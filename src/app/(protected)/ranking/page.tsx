@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import RankingTable from "@/components/RankingTable";
 import RankingFilters from "./RankingFilters";
 import React from "react";
+import { capitalizeName } from "@/lib/utils";
 
 export const metadata = {
   title: "Ranking | QuadraHub",
@@ -51,7 +52,7 @@ export default async function RankingPage({
     return {
       position: index + 1,
       id: userData.id,
-      name: userData.name,
+      name: capitalizeName(userData.name),
       city: userData.city,
       avatar_url: userData.avatar_url,
       rating: athlete.rating,

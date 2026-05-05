@@ -10,7 +10,7 @@ import {
   Target, 
   Map, 
   Bug, 
-  Dribbble 
+  Activity 
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -29,7 +29,7 @@ export function Sidebar({ activePage, setActivePage }: SidebarProps) {
       { id: 'campeonatos', label: 'Campeonatos', icon: Trophy },
       { id: 'atletas', label: 'Atletas', icon: Users },
       { id: 'organizadores', label: 'Organizadores', icon: ClipboardList, badge: { type: 'warning', text: '2' } },
-      { id: 'elo', label: 'Partidas & ELO', icon: Dribbble },
+      { id: 'elo', label: 'Partidas & ELO', icon: Activity },
     ]},
     { group: 'Estratégia', items: [
       { id: 'monetizacao', label: 'Monetização', icon: Target },

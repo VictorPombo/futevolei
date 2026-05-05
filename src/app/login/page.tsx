@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { signInSchema } from "@/lib/validators";
@@ -103,7 +104,7 @@ function LoginForm() {
         >
           {resetSent ? (
             <div className="text-center py-4">
-              <div className="text-4xl mb-4">📧</div>
+              <Mail size={48} className="mx-auto mb-4 text-[var(--color-primary)]" />
               <h2 className="text-lg font-semibold mb-2">E-mail enviado!</h2>
               <p className="text-sm text-text-secondary">
                 Verifique sua caixa de entrada para redefinir sua senha.

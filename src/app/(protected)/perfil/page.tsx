@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import RatingBadge from "@/components/RatingBadge";
 import ProfileForm from "./ProfileForm";
+import WebAuthnRegister from "./WebAuthnRegister";
+import { capitalizeName } from "@/lib/utils";
 
 export const metadata = {
   title: "Perfil | QuadraHub",
@@ -49,15 +51,15 @@ export default async function PerfilPage() {
           {userData.avatar_url ? (
             <img
               src={userData.avatar_url}
-              alt={userData.name}
+              alt={capitalizeName(userData.name)}
               className="w-24 h-24 rounded-full object-cover"
             />
           ) : (
-            userData.name.charAt(0).toUpperCase()
+            capitalizeName(userData.name).charAt(0)
           )}
         </div>
         <div className="text-center sm:text-left">
-          <h2 className="text-xl font-bold">{userData.name}</h2>
+          <h2 className="text-xl font-bold">{capitalizeName(userData.name)}</h2>
           <p className="text-text-secondary text-sm">{userData.city}, {userData.state}</p>
           {profile && (
             <div className="mt-2">
@@ -69,6 +71,9 @@ export default async function PerfilPage() {
 
       {/* Edit Form */}
       <ProfileForm user={userData} />
+
+      {/* WebAuthn Register */}
+      <WebAuthnRegister isRegistered={profile?.biometrics_registered || false} />
     </div>
   );
 }
